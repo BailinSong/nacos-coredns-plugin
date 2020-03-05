@@ -1,4 +1,4 @@
-module nacos-coredns-plugin
+module github.com/BailinSong/nacos-coredns-plugin
 
 go 1.13
 
