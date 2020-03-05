@@ -14,22 +14,57 @@
 package nacos_coredns_plugin
 
 import (
-	"testing"
-	"strings"
-	"net/http/httptest"
 	"net/http"
+	"net/http/httptest"
 	"strconv"
+	"strings"
+	"testing"
 )
 
 func TestNacosClient_GetDomain(t *testing.T) {
-	s := `{"dom":"hello123","cacheMillis":10000,"useSpecifiedURL":false,"hosts":[{"valid":true,"marked":false,"metadata":{},"instanceId":"","port":81,"ip":"2.2.2.2","weight":1.0,"enabled":true}],"checksum":"c7befb32f3bb5b169f76efbb0e1f79eb1542236821437","lastRefTime":1542236821437,"env":"","clusters":""}`
-	server := httptest.NewServer(http.HandlerFunc(func (w http.ResponseWriter, req *http.Request){
+	//s := `{"dom":"hello123","cacheMillis":10000,"useSpecifiedURL":false,"hosts":[{"valid":true,"marked":false,"metadata":{},"instanceId":"","port":81,"ip":"2.2.2.2","weight":1.0,"enabled":true}],"checksum":"c7befb32f3bb5b169f76efbb0e1f79eb1542236821437","lastRefTime":1542236821437,"env":"","clusters":""}`
+	s := `{
+"metadata": {},
+"dom": "nacos.test.3",
+"cacheMillis": 3000,
+"useSpecifiedURL": false,
+"hosts": [
+{
+"valid": true,
+"marked": false,
+"metadata": {},
+"instanceId": "192.168.25.129#8848#KanBan#DEFAULT_GROUP@@nacos.test.3",
+"port": 8848,
+"healthy": true,
+"ip": "2.2.2.2",
+"clusterName": "KanBan",
+"weight": 1,
+"ephemeral": true,
+"serviceName": "nacos.test.3",
+"enabled": true
+}
+],
+"name": "DEFAULT_GROUP@@nacos.test.3",
+"checksum": "b9ca0722f872f1d3c2d7ee0213c9ba9c",
+"lastRefTime": 1583376088992,
+"env": "",
+"clusters": ""
+}
+`
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		if req.URL.EscapedPath() == "/nacos/v1/ns/api/srvIPXT" {
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte(s))
-		} else if req.URL.EscapedPath() == "/nacos/v1/ns/api/allDomNames"  {
+		} else if req.URL.EscapedPath() == "/nacos/v1/ns/api/allDomNames" {
 			w.WriteHeader(http.StatusOK)
-			w.Write([]byte("{\"count\":1,\"doms\":[\"hello123\"]}"))
+			w.Write([]byte(`{
+"count": 1,
+"doms": {
+"public": [
+"nacos.test.3"
+]
+}
+}`))
 		}
 
 	}))
@@ -41,7 +76,8 @@ func TestNacosClient_GetDomain(t *testing.T) {
 	vc := NacosClient{NewConcurrentMap(), UDPServer{}, ServerManager{}, port}
 	vc.udpServer.vipClient = &vc
 	vc.SetServers([]string{strings.Split(strings.Split(server.URL, "http://")[1], ":")[0]})
-	instance := vc.SrvInstance("hello123", "127.0.0.1")
+	vc.getAllDomNames()
+	instance := vc.SrvInstance("nacos.test.3", "127.0.0.1")
 	if strings.Compare(instance.IP, "2.2.2.2") == 0 {
 		t.Log("Passed")
 	}
