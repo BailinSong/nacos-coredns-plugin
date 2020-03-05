@@ -3,6 +3,8 @@ package nacos_coredns_plugin
 import (
 	"fmt"
 	"github.com/caddyserver/caddy"
+	"github.com/coredns/coredns/core/dnsserver"
+	"github.com/coredns/coredns/plugin"
 	"github.com/coredns/coredns/plugin/forward"
 	"github.com/coredns/coredns/plugin/pkg/parse"
 	"github.com/coredns/coredns/plugin/pkg/transport"
@@ -11,9 +13,9 @@ import (
 	"strings"
 )
 
-func init(){
+func init() {
 
-	caddy.RegisterPlugin("nacos",caddy.Plugin{
+	caddy.RegisterPlugin("nacos", caddy.Plugin{
 		ServerType: "dns",
 		Action:     setup,
 	})
@@ -21,11 +23,16 @@ func init(){
 	fmt.Println("register nacos plugin")
 }
 
-func setup(c *caddy.Controller) error{
+func setup(c *caddy.Controller) error {
 	fmt.Println("setup nacos plugin")
 	os.Stderr = os.Stdout
 
-
+	dnsserver.GetConfig(c).AddPlugin(func(next plugin.Handler) plugin.Handler {
+		vs, _ := NacosParse(c)
+		vs.Next = next
+		Inited = true
+		return vs
+	})
 
 	return nil
 
@@ -41,7 +48,7 @@ func NacosParse(c *caddy.Controller) (*Nacos, error) {
 
 		if c.NextBlock() {
 			for {
-				switch v :=c.Val();v {
+				switch v := c.Val(); v {
 				case "nacos_server":
 					servers = strings.Split(c.RemainingArgs()[0], ",")
 					/* it is a noop now */
@@ -65,13 +72,13 @@ func NacosParse(c *caddy.Controller) (*Nacos, error) {
 						return &Nacos{}, err
 					}
 
-					var ups1 []string;
-					proxys:=forward.New()
+					var ups1 []string
+					proxys := forward.New()
 					for _, host := range ups {
-						if strings.Contains(host, "127.0.0.1"){
+						if strings.Contains(host, "127.0.0.1") {
 							continue
 						} else {
-							proxys.SetProxy(forward.NewProxy(host,transport.DNS))
+							proxys.SetProxy(forward.NewProxy(host, transport.DNS))
 							ups1 = append(ups1, host)
 							break
 						}
@@ -95,7 +102,6 @@ func NacosParse(c *caddy.Controller) (*Nacos, error) {
 			}
 
 		}
-
 
 		client := NewNacosClient(servers, serverPort)
 		nacosImpl.NacosClientImpl = client
