@@ -92,15 +92,15 @@ func (vs *Nacos) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg)
 
 	if !vs.managed(name[:len(name)-1], clientIP) {
 
-		rcode,err :=vs.Lookup(ctx, w, r, state, name, state.QType())
-		if err != nil{
-			return rcode,plugin.Error("Forward",err)
+		rcode, err := vs.Lookup(ctx, w, r, state, name, state.QType())
+		if err != nil {
+			return rcode, plugin.Error("Forward", err)
 		}
 		return rcode, err
 	} else {
-		hosts := make([]Instance, 0)
-		host := vs.NacosClientImpl.SrvInstance(name[:len(name)-1], clientIP)
-		hosts = append(hosts, *host)
+		//hosts := make([]Instance, 0)
+		hosts := vs.NacosClientImpl.SrvInstances(name[:len(name)-1], clientIP)
+		//hosts = append(hosts, *host)
 
 		answer := make([]dns.RR, 0)
 		extra := make([]dns.RR, 0)

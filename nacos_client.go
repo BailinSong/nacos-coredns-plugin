@@ -360,7 +360,7 @@ func (vc *NacosClient) getDomNow(domainName string, cache *ConcurrentMap, client
 	return domain
 }
 
-func (vc *NacosClient) SrvInstance(domainName, clientIP string) *Instance {
+func (vc *NacosClient) SrvInstances(domainName, clientIP string) []Instance {
 	cacheKey := GetCacheKey(domainName, clientIP)
 	item, hasDom := vc.domainMap.Get(cacheKey)
 	var dom Domain
@@ -377,7 +377,6 @@ func (vc *NacosClient) SrvInstance(domainName, clientIP string) *Instance {
 	hosts := dom.SrvInstances()
 
 	if len(hosts) == 0 {
-		NacosClientLogger.Warn("no hosts for " + domainName)
 		return nil
 	}
 
@@ -395,27 +394,39 @@ func (vc *NacosClient) SrvInstance(domainName, clientIP string) *Instance {
 	}
 
 	indexMap.Set(domainName, index)
+	total := len(hosts)
+	var newhosts []Instance
 
-	return &hosts[index]
+	for i, _ := range hosts {
+		rIndex := i + index
+		var temp Instance
+		if rIndex == 0 {
+			temp = hosts[rIndex]
+			isHas := vc.IsContain(newhosts, temp)
+			if !isHas {
+				newhosts = append(newhosts, hosts[rIndex])
+			}
+		} else {
+			temp = hosts[total%rIndex]
+			isHas := vc.IsContain(newhosts, temp)
+			if !isHas {
+				newhosts = append(newhosts, hosts[total%rIndex])
+			}
+		}
+
+	}
+	return newhosts
 }
+func (vc *NacosClient) SrvInstance(domainName, clientIP string) *Instance {
 
-func (vc *NacosClient) SrvInstances(domainName, clientIP string) []Instance {
-	cacheKey := GetCacheKey(domainName, clientIP)
-	item, hasDom := vc.domainMap.Get(cacheKey)
-	var dom Domain
+	hosts := vc.SrvInstances(domainName, clientIP)
 
-	if !hasDom {
-		dom = Domain{}
-		dom.Name = domainName
-		vc.domainMap.Set(cacheKey, dom)
-		dom = vc.getDomNow(domainName, &vc.domainMap, clientIP)
-	} else {
-		dom = item.(Domain)
+	if len(hosts) == 0 {
+		NacosClientLogger.Warn("no hosts for " + domainName)
+		return nil
 	}
 
-	hosts := dom.SrvInstances()
-
-	return hosts
+	return &hosts[0]
 }
 
 func (vc *NacosClient) Contains(dom, clientIP string, host Instance) bool {
@@ -427,5 +438,13 @@ func (vc *NacosClient) Contains(dom, clientIP string, host Instance) bool {
 		}
 	}
 
+	return false
+}
+func (vc *NacosClient) IsContain(items []Instance, item Instance) bool {
+	for _, eachItem := range items {
+		if eachItem == item {
+			return true
+		}
+	}
 	return false
 }
