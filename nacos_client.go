@@ -400,17 +400,12 @@ func (vc *NacosClient) SrvInstances(domainName, clientIP string) []Instance {
 	for i, _ := range hosts {
 		rIndex := i + index
 		var temp Instance
-		if rIndex == 0 {
-			temp = hosts[rIndex]
-			isHas := vc.IsContain(newhosts, temp)
-			if !isHas {
-				newhosts = append(newhosts, hosts[rIndex])
-			}
+		if total == 0 {
 		} else {
-			temp = hosts[total%rIndex]
+			temp = hosts[rIndex%total]
 			isHas := vc.IsContain(newhosts, temp)
 			if !isHas {
-				newhosts = append(newhosts, hosts[total%rIndex])
+				newhosts = append(newhosts, temp)
 			}
 		}
 

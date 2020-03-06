@@ -82,3 +82,97 @@ func TestNacosClient_GetDomain(t *testing.T) {
 		t.Log("Passed")
 	}
 }
+
+func Test_getInstens(t *testing.T) {
+
+	s := `{
+"metadata": {},
+"dom": "nacos.test.3",
+"cacheMillis": 3000,
+"useSpecifiedURL": false,
+"hosts": [
+{
+"valid": true,
+"marked": false,
+"metadata": {},
+"instanceId": "192.168.25.129#8848#KanBan#DEFAULT_GROUP@@nacos.test.3",
+"port": 8841,
+"healthy": true,
+"ip": "2.2.2.1",
+"clusterName": "KanBan",
+"weight": 1,
+"ephemeral": true,
+"serviceName": "nacos.test.3",
+"enabled": true
+},
+{
+"valid": true,
+"marked": false,
+"metadata": {},
+"instanceId": "192.168.25.129#8848#KanBan#DEFAULT_GROUP@@nacos.test.3",
+"port": 8842,
+"healthy": true,
+"ip": "2.2.2.2",
+"clusterName": "KanBan",
+"weight": 1,
+"ephemeral": true,
+"serviceName": "nacos.test.3",
+"enabled": true
+},
+{
+"valid": true,
+"marked": false,
+"metadata": {},
+"instanceId": "192.168.25.129#8848#KanBan#DEFAULT_GROUP@@nacos.test.3",
+"port": 8843,
+"healthy": true,
+"ip": "2.2.2.3",
+"clusterName": "KanBan",
+"weight": 1,
+"ephemeral": true,
+"serviceName": "nacos.test.3",
+"enabled": true
+}
+],
+"name": "DEFAULT_GROUP@@nacos.test.3",
+"checksum": "b9ca0722f872f1d3c2d7ee0213c9ba9c",
+"lastRefTime": 1583376088992,
+"env": "",
+"clusters": ""
+}
+`
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		if req.URL.EscapedPath() == "/nacos/v1/ns/api/srvIPXT" {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(s))
+		} else if req.URL.EscapedPath() == "/nacos/v1/ns/api/allDomNames" {
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(`{
+"count": 1,
+"doms": {
+"public": [
+"nacos.test.3"
+]
+}
+}`))
+		}
+
+	}))
+
+	port, _ := strconv.Atoi(strings.Split(server.URL, ":")[2])
+
+	defer server.Close()
+
+	vc := NacosClient{NewConcurrentMap(), UDPServer{}, ServerManager{}, port}
+	vc.udpServer.vipClient = &vc
+	vc.SetServers([]string{strings.Split(strings.Split(server.URL, "http://")[1], ":")[0]})
+	vc.getAllDomNames()
+	for i := 1; i < 10; i++ {
+		t.Log("SrvInstances:" + string(i))
+		instances := vc.SrvInstances("nacos.test.3", "127.0.0.1")
+		for _, v := range instances {
+			t.Log(v.String())
+		}
+	}
+
+}
