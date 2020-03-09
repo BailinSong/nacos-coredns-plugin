@@ -148,8 +148,8 @@ func (vs *Nacos) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg)
 		state.SizeAndDo(m)
 		m = state.Scrub(m)
 		NacosClientLogger.Info(m)
-		w.WriteMsg(m)
-		NacosClientLogger.Info("ok")
+		werr := w.WriteMsg(m)
+		NacosClientLogger.Info(werr)
 		return dns.RcodeSuccess, nil
 	}
 
