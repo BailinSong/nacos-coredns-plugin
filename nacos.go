@@ -104,7 +104,11 @@ func (vs *Nacos) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg)
 
 		answer := make([]dns.RR, 0)
 		extra := make([]dns.RR, 0)
+
 		for _, host := range hosts {
+
+			NacosClientLogger.Info(host)
+
 			var rr dns.RR
 
 			switch state.Family() {
@@ -143,6 +147,7 @@ func (vs *Nacos) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg)
 
 		state.SizeAndDo(m)
 		m = state.Scrub(m)
+		NacosClientLogger.Info(m)
 		w.WriteMsg(m)
 		return dns.RcodeSuccess, nil
 	}

@@ -231,7 +231,7 @@ func ProcessDomainString(s string) (Domain, error) {
 		return domain, NacosClientError{"empty ip list"}
 	}
 
-	NacosClientLogger.Info("domain "+domain.Name+" is updated, current ips: ", domain.getInstances())
+	NacosClientLogger.Debug("domain "+domain.Name+" is updated, current ips: ", domain.getInstances())
 
 	return domain, nil
 }
