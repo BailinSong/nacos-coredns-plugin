@@ -31,7 +31,7 @@ type Instance struct {
 }
 
 func (v *Instance) equals(v2 Instance) bool {
-	return v.InstanceId == v2.InstanceId && v.Enabled == v2.Enabled && v.Weight == v2.Weight
+	return v.InstanceId == v2.InstanceId && v.Enabled == v2.Enabled && v.Weight == v2.Weight && v.Valid == v2.Valid
 }
 
 func (h Instance) String() string {
