@@ -16,13 +16,22 @@ package nacos_coredns_plugin
 import "encoding/json"
 
 type Instance struct {
-	IP string
-	Port int
-	Weight float64
-	Valid bool
-	Unit string
-	AppUseType string
-	Site string
+	InstanceId  string
+	ServiceName string
+	Enabled     bool
+	IP          string
+	Port        int
+	Weight      float64
+	Valid       bool
+	Unit        string
+	AppUseType  string
+	Site        string
+	Metadata    map[string]string
+	clusterName string
+}
+
+func (v *Instance) equals(v2 Instance) bool {
+	return v.InstanceId == v2.InstanceId && v.Enabled == v2.Enabled && v.Weight == v2.Weight
 }
 
 func (h Instance) String() string {

@@ -428,7 +428,7 @@ func (vc *NacosClient) Contains(dom, clientIP string, host Instance) bool {
 	hosts := vc.SrvInstances(dom, clientIP)
 
 	for _, host1 := range hosts {
-		if host1 == host {
+		if host1.equals(host) {
 			return true
 		}
 	}
@@ -437,7 +437,7 @@ func (vc *NacosClient) Contains(dom, clientIP string, host Instance) bool {
 }
 func (vc *NacosClient) IsContain(items []Instance, item Instance) bool {
 	for _, eachItem := range items {
-		if eachItem == item {
+		if eachItem.equals(item) {
 			return true
 		}
 	}

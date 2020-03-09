@@ -119,10 +119,16 @@ func (vs *Nacos) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg)
 			}
 
 			srv := new(dns.SRV)
-			srv.Hdr = dns.RR_Header{Name: "_" + state.Proto() + "." + state.QName(), Rrtype: dns.TypeSRV, Class: state.QClass(), Ttl: DNSTTL}
+			if host.Metadata == nil || host.Metadata["protocol"] == "" {
+				srv.Hdr = dns.RR_Header{Name: "_" + "tcp" + "." + state.QName(), Rrtype: dns.TypeSRV, Class: state.QClass(), Ttl: DNSTTL}
+			} else {
+				srv.Hdr = dns.RR_Header{Name: "_" + host.Metadata["protocol"] + "." + state.QName(), Rrtype: dns.TypeSRV, Class: state.QClass(), Ttl: DNSTTL}
+			}
+
 			port := host.Port
 			srv.Port = uint16(port)
-			srv.Target = "."
+			srv.Target = host.IP
+			srv.Weight = uint16(host.Weight)
 
 			extra = append(extra, srv)
 			answer = append(answer, rr)

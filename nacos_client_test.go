@@ -94,52 +94,59 @@ func Test_getInstens(t *testing.T) {
 {
 "valid": true,
 "marked": false,
-"metadata": {},
-"instanceId": "192.168.25.129#8848#KanBan#DEFAULT_GROUP@@nacos.test.3",
-"port": 8841,
-"healthy": true,
-"ip": "2.2.2.1",
-"clusterName": "KanBan",
-"weight": 1,
-"ephemeral": true,
-"serviceName": "nacos.test.3",
-"enabled": true
+"metadata": {
+"protocol": "http"
 },
-{
-"valid": true,
-"marked": false,
-"metadata": {},
-"instanceId": "192.168.25.129#8848#KanBan#DEFAULT_GROUP@@nacos.test.3",
-"port": 8842,
-"healthy": true,
-"ip": "2.2.2.2",
-"clusterName": "KanBan",
-"weight": 1,
-"ephemeral": true,
-"serviceName": "nacos.test.3",
-"enabled": true
-},
-{
-"valid": true,
-"marked": false,
-"metadata": {},
-"instanceId": "192.168.25.129#8848#KanBan#DEFAULT_GROUP@@nacos.test.3",
+"instanceId": "192.168.25.127#8843#KanBan#DEFAULT_GROUP@@nacos.test.3",
 "port": 8843,
 "healthy": true,
-"ip": "2.2.2.3",
+"ip": "192.168.25.127",
+"clusterName": "KanBan",
+"weight": 2,
+"ephemeral": true,
+"serviceName": "nacos.test.3",
+"enabled": true
+},
+{
+"valid": true,
+"marked": false,
+"metadata": {
+"protocol": "http"
+},
+"instanceId": "192.168.25.129#8841#KanBan#DEFAULT_GROUP@@nacos.test.3",
+"port": 8841,
+"healthy": true,
+"ip": "192.168.25.129",
 "clusterName": "KanBan",
 "weight": 1,
+"ephemeral": true,
+"serviceName": "nacos.test.3",
+"enabled": true
+},
+{
+"valid": true,
+"marked": false,
+"metadata": {
+"protocol": "http"
+},
+"instanceId": "192.168.25.245#8842#KanBan#DEFAULT_GROUP@@nacos.test.3",
+"port": 8842,
+"healthy": true,
+"ip": "192.168.25.245",
+"clusterName": "KanBan",
+"weight": 2,
 "ephemeral": true,
 "serviceName": "nacos.test.3",
 "enabled": true
 }
 ],
 "name": "DEFAULT_GROUP@@nacos.test.3",
-"checksum": "b9ca0722f872f1d3c2d7ee0213c9ba9c",
-"lastRefTime": 1583376088992,
+"checksum": "1cbfc5f52b1ea28f60288dfa46344f17",
+"lastRefTime": 1583487192431,
 "env": "",
 "clusters": ""
 }
+
 `
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		if req.URL.EscapedPath() == "/nacos/v1/ns/api/srvIPXT" {
