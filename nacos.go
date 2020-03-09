@@ -131,7 +131,7 @@ func (vs *Nacos) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg)
 
 			port := host.Port
 			srv.Port = uint16(port)
-			srv.Target = host.IP
+			srv.Target = state.QName()
 			srv.Weight = uint16(host.Weight)
 
 			extra = append(extra, srv)
@@ -140,6 +140,7 @@ func (vs *Nacos) ServeDNS(ctx context.Context, w dns.ResponseWriter, r *dns.Msg)
 
 		m.Answer = answer
 		m.Extra = extra
+
 		result, _ := json.Marshal(m.Answer)
 		NacosClientLogger.Info("[RESOLVE]", " ["+name[:len(name)-1]+"]  result: "+string(result)+", clientIP: "+clientIP)
 		m.SetReply(r)
